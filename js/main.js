@@ -457,9 +457,9 @@ function smoothScrollToProject(index) {
 
 		const delta = Math.sign(event.deltaY)
 		if (delta > 0) {
-			goToProject(currentIndex + 1)
+			goToProject(currentIndex + 0.75)
 		} else if (delta <= 0) {
-			goToProject(currentIndex - 1)
+			goToProject(currentIndex - 0.75)
 		}
 	}
 
@@ -469,10 +469,84 @@ function smoothScrollToProject(index) {
 		handleWheel(event)
 		setTimeout(() => {
 			isAnimating = false
-		}, 2000)
+		}, 200)
 	})
 }
 smoothScrollToProject()
+// about
+
+function smoothScrollToAbout(index) {
+	const sections = gsap.utils.toArray('.test')
+	const $container = $('.about__container')
+	let currentIndex = 0
+	let isAnimating = false
+
+	function goToAbout(index) {
+		if (isAnimating || index === currentIndex) return
+
+		const perem = -index * window.innerHeight
+		const perem_count = -6 * window.innerHeight
+		if (perem > perem_count && 0 >= perem) {
+			isAnimating = true
+
+			index = Math.max(0, Math.min(index, sections.length - 1))
+			currentIndex = index
+
+			gsap.to($container, {
+				y: perem,
+				duration: 1,
+				ease: 'power1.out',
+				onComplete: () => {
+					isAnimating = false
+				},
+			})
+
+			gsap.to('.main-logo', {
+				y: index !== 0 ? -150 : 0,
+				duration: 0.6,
+				ease: 'power3.out',
+			})
+		}
+	}
+
+	ScrollTrigger.create({
+		trigger: $container[0],
+		start: 'top top',
+		end: () => `+=${sections.length * window.innerHeight}`,
+		pin: true,
+		pinSpacing: false,
+		scrub: 1,
+		onUpdate: self => {
+			if (!isAnimating) {
+				const newIndex = Math.round(self.scroll() / window.innerHeight)
+				if (newIndex !== currentIndex) {
+					currentIndex = newIndex
+				}
+			}
+		},
+	})
+
+	function handleWheel(event) {
+		if (isAnimating) return
+
+		const delta = Math.sign(event.deltaY)
+		if (delta > 0) {
+			goToAbout(currentIndex + 1)
+		} else if (delta <= 0) {
+			goToAbout(currentIndex - 1)
+		}
+	}
+
+	window.addEventListener('wheel', event => {
+		if (isAnimating) return
+
+		handleWheel(event)
+		setTimeout(() => {
+			isAnimating = false
+		}, 1000)
+	})
+}
+smoothScrollToAbout()
 
 // О НАС
 
@@ -555,7 +629,7 @@ $('.projects-item').click(function () {
 
 		gsap.to($('.header__background'), {
 			left: $(window).width() - 130,
-			duration: 1,
+			duration: .5,
 			width: 70,
 			ease: 'power2.inOut',
 		})
